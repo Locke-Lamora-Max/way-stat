@@ -1,0 +1,41 @@
+#!/usr/bin/env python3
+import argparse, subprocess, os, sys
+
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+LOG_FILE = os.path.join(BASE_DIR, "way-stat.log")
+SCRIPTS = {
+    "niri_daemon": os.path.join(BASE_DIR, "niri_daemon.py"),
+    "hyprland_daemon": os.path.join(BASE_DIR, "hyprland_daemon.py"),
+    "markov": os.path.join(BASE_DIR, "pure_markov.py"),
+    "tui": os.path.join(BASE_DIR, "niri_tui.py"),
+}
+
+def main():
+    parser = argparse.ArgumentParser(description="Wayland Analytics Master CLI (way-stat)")
+    subparsers = parser.add_subparsers(dest="command")
+    daemon = subparsers.add_parser("daemon")
+    daemon.add_argument("--wm", choices=["niri", "hyprland"], default="niri")
+    daemon.add_argument("--start", action="store_true")
+    daemon.add_argument("--stop", action="store_true")
+    daemon.add_argument("--log", action="store_true")
+    subparsers.add_parser("markov")
+    tui = subparsers.add_parser("tui")
+    tui.add_argument("--watch", action="store_true")
+    args = parser.parse_args()
+
+    if args.command == "daemon":
+        script = SCRIPTS[f"{args.wm}_daemon"]
+        if args.start:
+            print(f"Starting {args.wm} daemon...")
+            with open(LOG_FILE, "a") as log:
+                subprocess.Popen([sys.executable, script], stdout=log, stderr=log, preexec_fn=os.setpgrp)
+        elif args.stop:
+            print("Stopping daemons..."); subprocess.run(["pkill", "-f", SCRIPTS["niri_daemon"]]); subprocess.run(["pkill", "-f", SCRIPTS["hyprland_daemon"]])
+        elif args.log: subprocess.run(["tail", "-f", LOG_FILE])
+    elif args.command == "markov": subprocess.run([sys.executable, SCRIPTS["markov"]])
+    elif args.command == "tui":
+        if args.watch: subprocess.run(["watch", "-n", "5", "-c", sys.executable, SCRIPTS["tui"]])
+        else: subprocess.run([sys.executable, SCRIPTS["tui"]])
+    else: parser.print_help()
+
+if __name__ == "__main__": main()

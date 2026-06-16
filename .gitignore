@@ -1,0 +1,6 @@
+*.db
+*.log
+*.png
+__pycache__/
+.venv/
+.gemini/
