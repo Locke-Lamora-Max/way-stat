@@ -11,7 +11,7 @@ A zero-dependency, high-performance analytics suite for Niri and Hyprland.
 ## Installation
 First, clone the repository to your local machine:
 ```bash
-git clone https://github.com/yourusername/way-stat.git
+git clone https://github.com/Locke-Lamora-Max/way-stat.git
 cd way-stat
 ```
 
